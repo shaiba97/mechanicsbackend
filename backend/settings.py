@@ -27,14 +27,23 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-vvum($ky15d#d&ec2aeuk=5o%lsxm(-a_6vfz!xx0h^(r^57&2'
+SECRET_KEY = env(
+    'SECRET_KEY',
+    default='django-insecure-vvum($ky15d#d&ec2aeuk=5o%lsxm(-a_6vfz!xx0h^(r^57&2',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', False)
 APPEND_SLASH = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '::1']
+ALLOWED_HOSTS = env.list(
+    'ALLOWED_HOSTS',
+    default=['localhost', '127.0.0.1', '[::1]', '::1', '.onrender.com'],
+)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+
+# Trust Render's TLS-terminating proxy so request.is_secure()/CSRF work behind https.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -98,20 +107,38 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'backend.exceptions.api_exception_handler',
 }
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    },
-}
+REDIS_URL = env('REDIS_URL', default='')
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {'hosts': [REDIS_URL]},
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:3100',
-    'http://127.0.0.1:3100',
-    'http://localhost:3200',
-    'http://127.0.0.1:3200',
-]
+CORS_ALLOWED_ORIGINS = env.list(
+    'CORS_ALLOWED_ORIGINS',
+    default=[
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'http://localhost:3100',
+        'http://127.0.0.1:3100',
+        'http://localhost:3200',
+        'http://127.0.0.1:3200',
+    ],
+)
+
+# Needed when the API itself is served over https (Django >= 4 expects scheme+host).
+CSRF_TRUSTED_ORIGINS = env.list(
+    'CSRF_TRUSTED_ORIGINS',
+    default=['http://localhost:8000'],
+)
 
 # Secret used to sign HS256 JWT access tokens (verified on the WebSocket layer)
 JWT_SECRET = env('JWT_SECRET', default='')
