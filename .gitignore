@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Secrets
+.env
+.env.*
+
+# Database
+db.sqlite3
+
+# Serving/static
+media/
+staticfiles/
+
+# Tooling
+.vscode/
+.idea/
+*.log
