@@ -38,7 +38,7 @@ APPEND_SLASH = False
 
 ALLOWED_HOSTS = env.list(
     'ALLOWED_HOSTS',
-    default=['localhost', '127.0.0.1', '[::1]', '::1', '.onrender.com'],
+    default=[*],
 )
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 
@@ -125,19 +125,16 @@ else:
 CORS_ALLOWED_ORIGINS = env.list(
     'CORS_ALLOWED_ORIGINS',
     default=[
-        'http://localhost:3000',
-        'http://127.0.0.1:3000',
-        'http://localhost:3100',
-        'http://127.0.0.1:3100',
-        'http://localhost:3200',
-        'http://127.0.0.1:3200',
+        'https://mechanicsadmin.vercel.app',
+        'https://mechanicsstore.vercel.app',
+        'https://mechanicscustomer.vercel.app'
     ],
 )
 
 # Needed when the API itself is served over https (Django >= 4 expects scheme+host).
 CSRF_TRUSTED_ORIGINS = env.list(
     'CSRF_TRUSTED_ORIGINS',
-    default=['http://localhost:8000'],
+    default=['https://*.vercel.app'],
 )
 
 # Secret used to sign HS256 JWT access tokens (verified on the WebSocket layer)
@@ -146,7 +143,7 @@ JWT_ACCESS_TTL_SECONDS = 60 * 15
 JWT_REFRESH_TTL_SECONDS = 60 * 60 * 24 * 7
 
 # Where OAuth flows send the browser back after sign-in (the Store app)
-STORE_REDIRECT_URL = env('STORE_REDIRECT_URL', default='http://localhost:3100')
+STORE_REDIRECT_URL = env('STORE_REDIRECT_URL', default='https://mechanicsstore.vercel.app')
 
 SOCIAL_OAUTH = {
     'google': {
